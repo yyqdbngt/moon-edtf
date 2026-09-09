@@ -11,8 +11,8 @@ application and does not replace the applicant's own verification.
 - License: Apache-2.0
 - Repository URL recorded in `moon.mod`: https://github.com/yyqdbngt/moon-edtf
 - Local git identity: `yyqdbngt <300715189+yyqdbngt@users.noreply.github.com>`
-- No remote push, MoonCakes publish, or remote repository creation was performed
-  during this local delivery.
+- Public GitHub repository exists at https://github.com/yyqdbngt/moon-edtf and
+- MoonCakes publication has not been performed and must be rechecked on submission day.
 
 ## Implemented facts
 

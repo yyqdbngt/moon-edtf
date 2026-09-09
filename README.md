@@ -1,6 +1,8 @@
 # Moon EDTF
 
-纯 MoonBit 实现的 EDTF（Extended Date/Time Format）**明确子集**解析库。核心目标是保留日期的不确定/近似/掩码语义，而不是把“约 1984 年”擅自变成某个精确时间戳。仓库仅用于本地参赛交付，不自动推送或发布。
+[![CI](https://github.com/yyqdbngt/moon-edtf/actions/workflows/ci.yml/badge.svg)](https://github.com/yyqdbngt/moon-edtf/actions/workflows/ci.yml)
+
+纯 MoonBit 实现的 EDTF（Extended Date/Time Format）**明确子集**解析库。核心目标是保留日期的不确定/近似/掩码语义，而不是把“约 1984 年”擅自变成某个精确时间戳。
 
 ## 目标
 
@@ -105,3 +107,4 @@ moon run examples/basic --target js
 - [版本记录](CHANGELOG.md)
 
 代码、测试和文档由维护者使用 AI 编程辅助工具开发；参赛者需亲自理解、验证并撰写/改写申报材料。许可证：[Apache-2.0](LICENSE)。
+
