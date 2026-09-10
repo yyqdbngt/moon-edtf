@@ -7,7 +7,7 @@ pub(all) suberror EdtfError {
 } derive(Eq, @debug.Debug)
 
 ///|
-/// Uncertainty and approximation markers attached to one date component.
+/// Effective uncertainty and approximation of one date component.
 pub(all) struct Qualifier {
   uncertain : Bool
   approximate : Bool
@@ -54,11 +54,11 @@ pub(all) struct EdtfDate {
 } derive(Eq, @debug.Debug)
 
 ///|
-/// One interval endpoint. `Open` is the EDTF `..` boundary (also accepted as
-/// an empty side in `1984/` or `/1984`).
+/// One interval endpoint: `..` is Open; an empty side is Unknown.
 pub(all) enum Endpoint {
   Known(EdtfDate)
   Open
+  Unknown
 } derive(Eq, @debug.Debug)
 
 ///|
@@ -73,7 +73,7 @@ pub(all) enum EdtfValue {
   Date(EdtfDate)
   Interval(EdtfInterval)
   Set(Array[EdtfValue])
-  Unknown
+  Range(EdtfDate, EdtfDate)
 } derive(Eq, @debug.Debug)
 
 ///|

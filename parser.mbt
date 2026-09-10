@@ -71,6 +71,10 @@ fn Parser::parse_qualifier(self : Parser) -> Qualifier {
 fn Parser::parse_year(self : Parser) -> (YearSpec, Qualifier) raise EdtfError {
   let start = self.pos
   let mut negative = false
+  let extended = self.peek() == 89
+  if extended {
+    self.pos += 1
+  }
   if self.peek() == 45 {
     negative = true
     self.pos += 1
@@ -94,10 +98,10 @@ fn Parser::parse_year(self : Parser) -> (YearSpec, Qualifier) raise EdtfError {
   let digits = self.source[digits_start:digits_end].to_owned()
   let qualifier = self.parse_qualifier()
   if x_count > 0 {
-    if negative {
+    if negative || extended {
       raise Syntax("INVALID_YEAR", start)
     }
-    if digits.length() == 0 {
+    if digits.length() + x_count != 4 || x_count > 2 {
       raise Syntax("INVALID_YEAR", start)
     }
     return (Masked(digits, x_count), qualifier)
@@ -108,7 +112,13 @@ fn Parser::parse_year(self : Parser) -> (YearSpec, Qualifier) raise EdtfError {
   if digits.length() > 9 {
     raise Syntax("YEAR_LIMIT", start)
   }
+  if (extended && digits.length() <= 4) || (!extended && digits.length() != 4) {
+    raise Syntax("INVALID_YEAR", start)
+  }
   let value = parse_int_digits(digits)
+  if extended && value < 10000 {
+    raise Syntax("INVALID_YEAR", start)
+  }
   if negative {
     if value == 0 {
       raise Syntax("INVALID_YEAR", start)
@@ -219,6 +229,15 @@ fn Parser::parse_date(self : Parser) -> EdtfDate raise EdtfError {
       validate_day(year, month, day, day_start)
     }
   }
+  // A suffix qualifies its component and every component to its left.
+  month_qualifier = {
+    uncertain: month_qualifier.uncertain || day_qualifier.uncertain,
+    approximate: month_qualifier.approximate || day_qualifier.approximate,
+  }
+  let year_qualifier = {
+    uncertain: year_qualifier.uncertain || month_qualifier.uncertain,
+    approximate: year_qualifier.approximate || month_qualifier.approximate,
+  }
   { year, year_qualifier, month, month_qualifier, day, day_qualifier, }
 }
 
@@ -234,7 +253,7 @@ fn Parser::parse_endpoint(self : Parser) -> Endpoint raise EdtfError {
 ///|
 fn Parser::parse_interval_end(self : Parser) -> Endpoint raise EdtfError {
   if self.peek() == -1 {
-    return Open
+    return Unknown
   }
   self.parse_endpoint()
 }
@@ -254,35 +273,12 @@ fn Parser::parse_set(self : Parser) -> EdtfValue raise EdtfError {
     if self.peek() == -1 {
       raise Syntax("INVALID_SET", self.pos)
     }
-    let first = self.parse_endpoint()
-    let item = if self.peek() == 47 {
-      self.pos += 1
-      let second = if self.peek() == 44 ||
-        self.peek() == 93 ||
-        self.peek() == -1 {
-        Open
-      } else {
-        self.parse_endpoint()
-      }
-      Interval({ start: first, end: second, })
-    } else if self.peek() == 46 && self.peek_at(self.pos + 1) == 46 {
+    let first = self.parse_date()
+    let item = if self.peek() == 46 && self.peek_at(self.pos + 1) == 46 {
       self.pos += 2
-      match first {
-        Known(start_date) => {
-          let second = self.parse_endpoint()
-          match second {
-            Known(end_date) =>
-              Interval({ start: Known(start_date), end: Known(end_date), })
-            Open => raise Syntax("INVALID_SET", self.pos)
-          }
-        }
-        Open => raise Syntax("INVALID_SET", self.pos)
-      }
+      Range(first, self.parse_date())
     } else {
-      match first {
-        Known(d) => Date(d)
-        Open => raise Syntax("INVALID_SET", self.pos)
-      }
+      Date(first)
     }
     items.push(item)
     match self.peek() {
@@ -307,7 +303,7 @@ fn Parser::parse_value(self : Parser) -> EdtfValue raise EdtfError {
   if self.peek() == 91 {
     return self.parse_set()
   }
-  let first = if self.peek() == 47 { Open } else { self.parse_endpoint() }
+  let first = if self.peek() == 47 { Unknown } else { self.parse_endpoint() }
   if self.peek() == 47 {
     self.pos += 1
     let second = self.parse_interval_end()
@@ -315,7 +311,7 @@ fn Parser::parse_value(self : Parser) -> EdtfValue raise EdtfError {
   }
   match first {
     Known(d) => Date(d)
-    Open => Unknown
+    Open | Unknown => raise Syntax("EXPECTED_INTERVAL", self.pos)
   }
 }
 

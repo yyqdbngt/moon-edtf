@@ -18,12 +18,12 @@ fn exact_year_to_string(value : Int) -> String {
     if magnitude < 10000 {
       "-" + pad4(magnitude)
     } else {
-      "-" + magnitude.to_string()
+      "Y-" + magnitude.to_string()
     }
   } else if value < 10000 {
     pad4(value)
   } else {
-    value.to_string()
+    "Y" + value.to_string()
   }
 }
 
@@ -67,14 +67,24 @@ fn day_to_string(day : DaySpec) -> String {
 
 ///|
 fn date_to_string(date : EdtfDate) -> String {
-  let year = year_to_string(date.year) +
-    qualifier_to_string(date.year_qualifier)
+  // Omit suffix bits already encoded by a qualifier to the right.
+  let year_suffix = {
+    uncertain: date.year_qualifier.uncertain && !date.month_qualifier.uncertain,
+    approximate: date.year_qualifier.approximate &&
+    !date.month_qualifier.approximate,
+  }
+  let month_suffix = {
+    uncertain: date.month_qualifier.uncertain && !date.day_qualifier.uncertain,
+    approximate: date.month_qualifier.approximate &&
+    !date.day_qualifier.approximate,
+  }
+  let year = year_to_string(date.year) + qualifier_to_string(year_suffix)
   match date.month {
     Unspecified => year
     _ => {
       let month = "-" +
         month_to_string(date.month) +
-        qualifier_to_string(date.month_qualifier)
+        qualifier_to_string(month_suffix)
       match date.day {
         Unspecified => year + month
         _ =>
@@ -93,6 +103,7 @@ fn endpoint_to_string(endpoint : Endpoint) -> String {
   match endpoint {
     Known(date) => date_to_string(date)
     Open => ".."
+    Unknown => ""
   }
 }
 
@@ -114,7 +125,7 @@ fn value_to_string(value : EdtfValue) -> String {
       }
       out + "]"
     }
-    Unknown => ".."
+    Range(start, end) => date_to_string(start) + ".." + date_to_string(end)
   }
 }
 
@@ -229,16 +240,16 @@ pub fn compare(left : EdtfValue, right : EdtfValue) -> Int raise EdtfError {
   assert_unqualified(b)
   let year_a = exact_year(a)
   let year_b = exact_year(b)
+  let month_a = exact_month(a)
+  let month_b = exact_month(b)
+  let day_a = exact_day(a)
+  let day_b = exact_day(b)
   if year_a != year_b {
     return if year_a < year_b { -1 } else { 1 }
   }
-  let month_a = exact_month(a)
-  let month_b = exact_month(b)
   if month_a != month_b {
     return if month_a < month_b { -1 } else { 1 }
   }
-  let day_a = exact_day(a)
-  let day_b = exact_day(b)
   if day_a != day_b {
     return if day_a < day_b { -1 } else { 1 }
   }

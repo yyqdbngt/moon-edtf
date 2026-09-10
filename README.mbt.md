@@ -6,7 +6,8 @@ Zero third-party package dependencies.
 
 ## Consumer example
 
-After adding `yyqdbngt/moon_edtf@0.1.0`, import it in your `moon.pkg`:
+After publication is confirmed, add `yyqdbngt/moon_edtf@0.1.0` and import it
+in your `moon.pkg`. Source-based verification is documented in the repository README.
 
 ```text
 import {
@@ -46,30 +47,35 @@ Invalid rows keep `normalized` as `""`.
 ## Supported EDTF subset
 
 - Exact dates: `YYYY`, `YYYY-MM`, `YYYY-MM-DD`, negative years, and years with
-  more than four digits. Exact years are limited to nine decimal digits to fit
+  more than four digits with a mandatory Y prefix (Y10000, Y-10000). Exact years are limited to nine decimal digits to fit
   `Int`.
 - Seasons: `YYYY-21` through `YYYY-24` as a documented extension. A season has
   no day component.
 - Qualifiers: `?` (uncertain), `~` (approximate), `%` (both). Qualifiers may
-  apply to the year, month, or day component.
+  appear as suffixes and apply to that component and all components to its left.
+  Fields store effective qualifications; normalization may remove redundant markers.
 - Masked low-order year digits: `199X`, `19XX`. Serialization preserves the
   mask instead of inventing `1990` or `1900`.
-- Intervals: `start/end` with `..` or an empty side representing an open
-  endpoint. Bare `..` is `EdtfValue::Unknown`.
+- Intervals: `start/end`; `Endpoint::Open` is `..`, while `Endpoint::Unknown`
+  is an empty side. The distinction is preserved. Bare `..` is rejected.
 - Choice sets: `[1667,1668]` and `[1667,1668,1670..1672]`. A set-local `a..b`
-  range is normalized as an interval `a/b`.
+  range remains `a..b` and is stored as `EdtfValue::Range`, not `Interval`.
 - Batch diagnostics with stable error codes.
 
 Month and day boundaries are validated. For exact years, `02-29` uses the
 proleptic Gregorian leap-year rule. For masked years the leap-year status is
-unknown, so `02-29` receives only the basic day-range check.
+unknown, so February 29 is allowed; February 30 and April 31 are still rejected.
 
 ## Explicit non-goals
 
 No natural-language date recognition. No complete calendar/timeline expansion.
 No conversion of uncertain/approximate/masked values into precise timestamps.
 No time/zone syntax, masked month/day, nested sets, open/unknown set endpoints,
-or full EDTF Level 1/2 coverage.
+individual prefix qualifiers, curly-brace all-member sets or slash intervals
+inside choice sets. No complete EDTF conformance level is claimed, including Level 0.
+
+The round-trip contract applies to parser-produced values. Public constructors
+can represent invalid combinations and are not a substitute for parse validation.
 
 ## Comparison contract
 

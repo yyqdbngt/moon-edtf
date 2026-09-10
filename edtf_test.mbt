@@ -17,7 +17,8 @@ fn is_invalid(input : String) -> Bool {
 
 ///|
 test "exact dates parse and normalize" {
-  for s in ["1984", "1984-06", "1984-06-15", "-0999", "10000", "0000"] {
+  for
+    s in ["1984", "1984-06", "1984-06-15", "-0999", "Y10000", "Y-10000", "0000"] {
     assert_eq(normalized(s), s)
   }
 }
@@ -77,15 +78,15 @@ test "intervals parse each endpoint and preserve open states" {
   assert_eq(normalized("../1984"), "../1984")
   assert_eq(normalized("1984/.."), "1984/..")
   assert_eq(normalized("2004/.."), "2004/..")
-  assert_eq(normalized(".."), "..")
-  assert_eq(normalized("1984/"), "1984/..")
-  assert_eq(normalized("/1984"), "../1984")
+  assert_true(is_invalid(".."))
+  assert_eq(normalized("1984/"), "1984/")
+  assert_eq(normalized("/1984"), "/1984")
 }
 
 ///|
 test "choice sets and range shorthand are supported" {
   assert_eq(normalized("[1667,1668]"), "[1667,1668]")
-  assert_eq(normalized("[1667,1668,1670..1672]"), "[1667,1668,1670/1672]")
+  assert_eq(normalized("[1667,1668,1670..1672]"), "[1667,1668,1670..1672]")
 }
 
 ///|
@@ -124,8 +125,8 @@ test "common malformed inputs are rejected" {
 test "round-trip preserves semantics for supported values" {
   for
     s in [
-      "1984", "1984-06-15", "-0999", "10000", "1984?", "1984%", "199X", "19XX", "2004-01-01/2005",
-      "../1984", "1984/..", "..", "[1667,1668,1670..1672]",
+      "1984", "1984-06-15", "-0999", "Y10000", "1984?", "1984%", "199X", "19XX",
+      "2004-01-01/2005", "../1984", "1984/..", "1984/", "[1667,1668,1670..1672]",
     ] {
     let once = parse(s)
     let twice = parse(normalize(once))

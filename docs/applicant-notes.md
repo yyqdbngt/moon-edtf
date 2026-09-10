@@ -11,7 +11,7 @@ application and does not replace the applicant's own verification.
 - License: Apache-2.0
 - Repository URL recorded in `moon.mod`: https://github.com/yyqdbngt/moon-edtf
 - Local git identity: `yyqdbngt <300715189+yyqdbngt@users.noreply.github.com>`
-- Public GitHub repository exists at https://github.com/yyqdbngt/moon-edtf and
+- Public GitHub repository: https://github.com/yyqdbngt/moon-edtf
 - MoonCakes publication has not been performed and must be rechecked on submission day.
 
 ## Implemented facts
@@ -28,7 +28,7 @@ application and does not replace the applicant's own verification.
 ## Verification facts
 
 - MoonBit toolchain: `0.1.20260904`.
-- Tests: 16 `test {}` blocks in `edtf_test.mbt`.
+- Tests after review fixes: 21 blocks across edtf_test.mbt and regression_test.mbt.
 - Targets verified locally per final report: wasm, wasm-gc, js.
 - CI matrix covers wasm, wasm-gc, js, native on ubuntu-latest.
 - `native` may be skipped locally if the host C compiler is too old; CI still
@@ -50,3 +50,5 @@ application and does not replace the applicant's own verification.
 - Run the verification commands in a clean checkout.
 - Personally rewrite the proposal and any public description; do not submit the
   draft in `docs/proposal-draft.md` unchanged as personal work.
+- Follow [the submission checklist](submission-checklist.md) for account, commit,
+  human-authorship and publication checks. A commit count is not official acceptance.

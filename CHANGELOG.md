@@ -1,6 +1,17 @@
 # Changelog
 
-## 0.1.0 - 2026-09-XX
+## Unreleased — 2026-09-10 review fixes
+
+- Distinguish empty Unknown interval endpoints from Open (`..`) endpoints.
+- Keep choice-set ranges as Range with `..`, not slash intervals.
+- Propagate suffix qualification to components on the left and preserve round trips.
+- Validate full precision before comparison; require Y for extended years and bound masks.
+- Reject unsupported standalone `..` and slash intervals inside choice sets.
+- Public model change: replace EdtfValue::Unknown with Endpoint::Unknown and add Range.
+- Add five regression test blocks and correct documentation and application preparation notes.
+- Source updates only; MoonCakes publication must be checked separately.
+
+## 0.1.0 — initial source implementation
 
 - Initial pure-MoonBit EDTF subset parser.
 - Exact, masked, uncertain/approximate dates; intervals and open/unknown endpoints.
@@ -8,4 +19,4 @@
 - Stable diagnostics with UTF-16 offsets and no input echo in error values.
 - Limited exact-date comparison that refuses qualified/partial/masked values.
 - Tests for parsing, validation, round-trip, diagnostics, comparison, and examples.
-- Apache-2.0 license and local-only git history.
+- Apache-2.0 license and public GitHub development history.
