@@ -109,8 +109,10 @@ moon run examples/basic --target js
 - [技术设计与支持矩阵](docs/design.md)
 - [规范来源与查重说明](docs/provenance.md)
 - [申报前技术事实清单](docs/applicant-notes.md)
+- [项目申报书底稿](docs/proposal.md)（AI 辅助底稿，提交前由本人改写确认）
 - [人工申报准备清单](docs/proposal-draft.md)（不是正式申报书）
 - [版本记录](CHANGELOG.md)
 
 代码、测试和文档由维护者使用 AI 编程辅助工具开发；参赛者需亲自理解、验证并撰写/改写申报材料。许可证：[Apache-2.0](LICENSE)。
+
 
