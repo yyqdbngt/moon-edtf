@@ -13,7 +13,8 @@
   1,229 lines in six root files; examples and tests are counted separately.
 - Breaking correction: masked years are now year-only; `19XX-02-29` is rejected
   because the supported unspecified-digit grammar does not allow that form.
-- MoonCakes publication of this version requires separate verification.
+- MoonCakes 0.2.0 was published and independently installed and exercised;
+  archive checksum matches the registry. See `docs/release-verification.md`.
 
 ## Unreleased — 2026-09-10 review fixes
 

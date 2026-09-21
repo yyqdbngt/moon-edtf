@@ -6,9 +6,8 @@ Zero third-party package dependencies.
 
 ## Consumer example
 
-The published MoonCakes version is `0.1.0`; this repository's `0.2.0` is
-pending CI and publication. To use the new APIs before release, build from
-source. After release, add `yyqdbngt/moon_edtf@0.2.0` and import it in `moon.pkg`.
+Version `0.2.0` is published on MoonCakes and independently installed and
+executed. Add `yyqdbngt/moon_edtf@0.2.0` and import it in `moon.pkg`.
 
 ```text
 import {

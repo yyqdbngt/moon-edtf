@@ -22,8 +22,10 @@ cd moon-edtf
 moon run examples/basic --target js
 ```
 
-MoonCakes `0.1.0` 已发布；本仓库 `0.2.0` 在完成本轮 CI 后发布。当前新版能力请先从
-GitHub 源码运行，不能把旧包当作新代码。发布状态见[申报前技术事实清单](docs/applicant-notes.md)。
+MoonCakes [`yyqdbngt/moon_edtf@0.2.0`](https://mooncakes.io/api/v0/modules/yyqdbngt/moon_edtf)
+已发布并独立下载安装验证；命令、消费程序输出和 SHA-256 见
+[发布验证记录](docs/release-verification.md)。消费项目可运行
+`moon add yyqdbngt/moon_edtf@0.2.0`。
 库 API 契约见 [README.mbt.md](README.mbt.md)。在 `moon.pkg` 中导入：
 
 ```text
@@ -127,6 +129,7 @@ moon run examples/catalog-audit --target js
 
 - [技术设计与支持矩阵](docs/design.md)
 - [馆藏批量筛查场景测试](docs/catalog-scenario.md)
+- [MoonCakes 0.2.0 独立安装验证](docs/release-verification.md)
 - [规范来源与查重说明](docs/provenance.md)
 - [申报前技术事实清单](docs/applicant-notes.md)
 - [项目申报书底稿](docs/proposal.md)（AI 辅助底稿，提交前由本人改写确认）
