@@ -18,9 +18,12 @@ jobs:
         with:
           node-version: '24'
       - uses: hustcer/setup-moonbit@87e2bdf5cf20d3b6f5c5f266a8a513f503bb5b76
+        with:
+          version: '0.10.12+1634b282e'
       - run: moon version --all
       - run: moon fmt --check
       - run: moon check --target ${{ matrix.target }} --deny-warn
       - run: moon build --target ${{ matrix.target }} --deny-warn
       - run: moon test --target ${{ matrix.target }} --deny-warn
       - run: moon run examples/basic --target ${{ matrix.target }}
+      - run: moon run examples/catalog-audit --target ${{ matrix.target }}

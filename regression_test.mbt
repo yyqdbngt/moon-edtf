@@ -75,11 +75,11 @@ test "extended and masked years obey documented grammar limits" {
   for
     s in [
       "10000", "-10000", "Y1984", "Y00000", "1X", "199XX", "1XXX", "Y19XX", "19XX-04-31",
-      "19XX-02-30",
+      "19XX-02-30", "19XX-02-29",
     ] {
     assert_false(diagnose(s).valid)
   }
-  for s in ["Y10000", "Y-10000", "Y999999999", "199X", "19XX", "19XX-02-29"] {
+  for s in ["Y10000", "Y-10000", "Y999999999", "199X", "19XX"] {
     assert_eq(parse(s).to_string(), s)
   }
 }

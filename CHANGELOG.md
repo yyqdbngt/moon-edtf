@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.0 — catalog screening and expanded EDTF subset (2026-09-21)
+
+- Add explicit `XX` month/day forms and distinguish all-member `{...}` sets from
+  one-of `[...]` sets; bound same-precision set ranges.
+- Add complete date-time parsing with local, UTC and numeric offset spellings;
+  no implicit timezone conversion or claim of full Level 0 conformance.
+- Add conservative date envelopes, inclusive search-window relations and
+  structured catalog batch auditing with invalid/review/possible categories.
+- Add a six-row, reproducible metadata-ingest example and regression tests.
+- 39 test blocks pass on wasm, wasm-gc, js and native. Production MoonBit is
+  1,229 lines in six root files; examples and tests are counted separately.
+- Breaking correction: masked years are now year-only; `19XX-02-29` is rejected
+  because the supported unspecified-digit grammar does not allow that form.
+- MoonCakes publication of this version requires separate verification.
+
 ## Unreleased — 2026-09-10 review fixes
 
 - Distinguish empty Unknown interval endpoints from Open (`..`) endpoints.

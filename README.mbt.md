@@ -6,8 +6,9 @@ Zero third-party package dependencies.
 
 ## Consumer example
 
-After publication is confirmed, add `yyqdbngt/moon_edtf@0.1.0` and import it
-in your `moon.pkg`. Source-based verification is documented in the repository README.
+The published MoonCakes version is `0.1.0`; this repository's `0.2.0` is
+pending CI and publication. To use the new APIs before release, build from
+source. After release, add `yyqdbngt/moon_edtf@0.2.0` and import it in `moon.pkg`.
 
 ```text
 import {
@@ -35,6 +36,9 @@ The source repository contains a runnable version in `examples/basic`.
 - `diagnose(input : String) -> Diagnostic`
 - `diagnose_batch(inputs : Array[String]) -> Array[Diagnostic]`
 - `compare(left : EdtfValue, right : EdtfValue) -> Int raise EdtfError`
+- `date_envelope(value : EdtfValue) -> DateEnvelope raise EdtfError`
+- `window_relation(value, query_start, query_end) -> WindowRelation raise EdtfError`
+- `audit_catalog(entries, query_start, query_end) -> CatalogReport raise EdtfError`
 
 `EdtfError` is a stable error type with variants `Syntax(code, offset)` and
 `Unsupported(code, offset)`. `offset` is a half-open UTF-16 offset into the
@@ -54,24 +58,32 @@ Invalid rows keep `normalized` as `""`.
 - Qualifiers: `?` (uncertain), `~` (approximate), `%` (both). Qualifiers may
   appear as suffixes and apply to that component and all components to its left.
   Fields store effective qualifications; normalization may remove redundant markers.
-- Masked low-order year digits: `199X`, `19XX`. Serialization preserves the
-  mask instead of inventing `1990` or `1900`.
+- Masked low-order year digits: `199X`, `19XX`, in year-only expressions.
+  Unspecified month/day shapes include `2004-XX`, `1985-04-XX`, and
+  `1985-XX-XX`. Serialization preserves missing precision.
+- Complete date-times with HH:MM:SS and local, Z, hour-only, or hour-minute
+  offsets. Zone spelling is preserved, not converted.
 - Intervals: `start/end`; `Endpoint::Open` is `..`, while `Endpoint::Unknown`
   is an empty side. The distinction is preserved. Bare `..` is rejected.
 - Choice sets: `[1667,1668]` and `[1667,1668,1670..1672]`. A set-local `a..b`
   range remains `a..b` and is stored as `EdtfValue::Range`, not `Interval`.
+- All-member sets use `{...}` and remain distinct from one-of `[...]` sets.
 - Batch diagnostics with stable error codes.
+- Conservative date envelopes and inclusive exact-day window screening.
+  Qualified dates, seasons, unbounded intervals and date-times require review;
+  `PossibleOverlap` can be a false positive where an envelope has gaps.
+- Structured catalog batch audit with invalid/review/outside/within/possible
+  findings and counts. See `examples/catalog-audit` in the repository.
 
-Month and day boundaries are validated. For exact years, `02-29` uses the
-proleptic Gregorian leap-year rule. For masked years the leap-year status is
-unknown, so February 29 is allowed; February 30 and April 31 are still rejected.
+Month and day boundaries are validated. Exact years use the proleptic Gregorian
+leap-year rule. Masked years are year-only; `19XX-02-29` is rejected in this subset.
 
 ## Explicit non-goals
 
 No natural-language date recognition. No complete calendar/timeline expansion.
 No conversion of uncertain/approximate/masked values into precise timestamps.
-No time/zone syntax, masked month/day, nested sets, open/unknown set endpoints,
-individual prefix qualifiers, curly-brace all-member sets or slash intervals
+No date-time fractions, leap seconds, 24:00, timezone conversion, nested sets,
+open/unknown set endpoints, individual prefix qualifiers or slash intervals
 inside choice sets. No complete EDTF conformance level is claimed, including Level 0.
 
 The round-trip contract applies to parser-produced values. Public constructors

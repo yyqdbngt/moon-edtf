@@ -32,6 +32,7 @@ pub(all) enum YearSpec {
 pub(all) enum MonthSpec {
   Unspecified
   Exact(Int)
+  Masked
   Season(Int)
 } derive(Eq, @debug.Debug)
 
@@ -39,6 +40,7 @@ pub(all) enum MonthSpec {
 pub(all) enum DaySpec {
   Unspecified
   Exact(Int)
+  Masked
 } derive(Eq, @debug.Debug)
 
 ///|
@@ -71,8 +73,10 @@ pub(all) struct EdtfInterval {
 /// The public value union for the supported EDTF subset.
 pub(all) enum EdtfValue {
   Date(EdtfDate)
+  DateTime(EdtfDateTime)
   Interval(EdtfInterval)
   Set(Array[EdtfValue])
+  AllSet(Array[EdtfValue])
   Range(EdtfDate, EdtfDate)
 } derive(Eq, @debug.Debug)
 

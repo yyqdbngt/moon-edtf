@@ -1,54 +1,18 @@
-# Applicant technical fact sheet
+# 申报前技术事实清单
 
-This document is a pre-submission technical fact list. It is not a completed
-application and does not replace the applicant's own verification.
+本文件供申报人核对，不替代本人撰写的一页式申报书。
 
-## Repository and package
+- 项目：[Moon EDTF](https://github.com/yyqdbngt/moon-edtf)，模块
+  `yyqdbngt/moon_edtf`，Apache-2.0，运行依赖仅 `moonbitlang/core`。
+- 当前仓库版本 `0.2.0`；MoonCakes 已有 `0.1.0`，新版尚待正式发布与独立安装核验。
+- 根目录生产 MoonBit 1,229 行 / 6 文件；测试 537 行 / 39 块。计数不含示例、文档。
+- 解析支持 EDTF 明确子集：日期、日期时间、区间、掩码月日、择一/全部成员集合；
+  稳定错误码与原始 UTF-16 偏移；保守外包络、时间窗和目录批量审计。
+- wasm、wasm-gc、js、native 四后端本地各 39/39 通过；CI 还须以**最新提交**复核。
+- 六条示范元数据记录的场景结果为：窗口内 1、可能相交 1、窗口外 2、错误 1、
+  人工复核 1；数据是标准公开示例的写法组合，**不是实际馆藏数据集**。
+- 项目不宣称完整 EDTF 等级合规，不联网，不做自然语言识别、时区转换或精确的
+  集合成员检索。`PossibleOverlap` 可有假阳性。
 
-- Local path: `D:\Codex\moon-edtf`
-- Package name: `yyqdbngt/moon_edtf`
-- Version: `0.1.0`
-- License: Apache-2.0
-- Repository URL recorded in `moon.mod`: https://github.com/yyqdbngt/moon-edtf
-- Local git identity: `yyqdbngt <300715189+yyqdbngt@users.noreply.github.com>`
-- Public GitHub repository: https://github.com/yyqdbngt/moon-edtf
-- MoonCakes publication has not been performed and must be rechecked on submission day.
-
-## Implemented facts
-
-- Pure MoonBit library, zero third-party package dependencies.
-- `parse`, `normalize`/`to_string`, `diagnose`, `diagnose_batch`, `compare`.
-- Supports exact dates, negative/long years, seasons, uncertainty/approximation,
-  masked year digits, intervals, open/unknown endpoints, and choice sets.
-- Preserves uncertainty and masks; does not convert them to precise timestamps.
-- Stable error codes and original UTF-16 offsets; error values do not echo input.
-- Limited comparison only for complete unqualified exact dates; other inputs are
-  refused explicitly.
-
-## Verification facts
-
-- MoonBit toolchain: `0.1.20260904`.
-- Tests after review fixes: 21 blocks across edtf_test.mbt and regression_test.mbt.
-- Targets verified locally per final report: wasm, wasm-gc, js.
-- CI matrix covers wasm, wasm-gc, js, native on ubuntu-latest.
-- `native` may be skipped locally if the host C compiler is too old; CI still
-  covers it.
-
-## Boundary facts
-
-- No natural-language date recognition.
-- No complete calendar/timeline calculation.
-- No full EDTF Level 1/2, time, timezone, masked month/day, nested sets, or
-  open/unknown set endpoints.
-- Adjacent to general date libraries such as `brickfrog/tempo`; not a drop-in
-  replacement.
-- Search miss on MoonCakes/GitHub is not proof of absolute uniqueness.
-
-## Responsibilities before submission
-
-- Read `docs/design.md`, `docs/provenance.md`, and all source/tests.
-- Run the verification commands in a clean checkout.
-- Personally rewrite the proposal and any public description; do not submit the
-  draft in `docs/proposal-draft.md` unchanged as personal work.
-- Follow [the submission checklist](submission-checklist.md) for account, commit,
-  human-authorship and publication checks. A commit count is not official acceptance.
+提交前本人应检查：GitHub 最新提交及作者、CI、MoonCakes 对应版本与独立消费测试、
+申报书的本人理解段落，以及赛事表格里上传的是最新 Markdown 文件。

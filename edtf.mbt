@@ -53,6 +53,7 @@ fn month_to_string(month : MonthSpec) -> String {
   match month {
     Unspecified => ""
     Exact(value) => pad4(value)[2:4].to_owned()
+    Masked => "XX"
     Season(value) => pad4(value)[2:4].to_owned()
   }
 }
@@ -62,6 +63,7 @@ fn day_to_string(day : DaySpec) -> String {
   match day {
     Unspecified => ""
     Exact(value) => pad4(value)[2:4].to_owned()
+    Masked => "XX"
   }
 }
 
@@ -111,19 +113,24 @@ fn endpoint_to_string(endpoint : Endpoint) -> String {
 fn value_to_string(value : EdtfValue) -> String {
   match value {
     Date(date) => date_to_string(date)
+    DateTime(date_time) => date_time_to_string(date_time)
     Interval(interval) =>
       endpoint_to_string(interval.start) +
       "/" +
       endpoint_to_string(interval.end)
-    Set(items) => {
-      let mut out = "["
+    Set(items) | AllSet(items) => {
+      let (open, close) = match value {
+        AllSet(_) => ("{", "}")
+        _ => ("[", "]")
+      }
+      let mut out = open
       for i = 0; i < items.length(); i = i + 1 {
         if i > 0 {
           out = out + ","
         }
         out = out + value_to_string(items[i])
       }
-      out + "]"
+      out + close
     }
     Range(start, end) => date_to_string(start) + ".." + date_to_string(end)
   }

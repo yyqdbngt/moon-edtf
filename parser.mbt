@@ -132,6 +132,10 @@ fn Parser::parse_year(self : Parser) -> (YearSpec, Qualifier) raise EdtfError {
 fn Parser::parse_month(self : Parser) -> (MonthSpec, Qualifier) raise EdtfError {
   let start = self.pos
   self.pos += 1
+  if self.peek() == 88 && self.peek_at(self.pos + 1) == 88 {
+    self.pos += 2
+    return (Masked, self.parse_qualifier())
+  }
   let digits = self.read_two_digits("EXPECTED_MONTH")
   let value = parse_int_digits(digits)
   let qualifier = self.parse_qualifier()
@@ -148,6 +152,10 @@ fn Parser::parse_month(self : Parser) -> (MonthSpec, Qualifier) raise EdtfError 
 fn Parser::parse_day(self : Parser) -> (DaySpec, Qualifier) raise EdtfError {
   let start = self.pos
   self.pos += 1
+  if self.peek() == 88 && self.peek_at(self.pos + 1) == 88 {
+    self.pos += 2
+    return (Masked, self.parse_qualifier())
+  }
   let digits = self.read_two_digits("EXPECTED_DAY")
   let value = parse_int_digits(digits)
   let qualifier = self.parse_qualifier()
@@ -193,6 +201,7 @@ fn validate_day(
   match (month, day) {
     (Unspecified, Exact(_)) => raise Syntax("INVALID_DATE", day_start)
     (Season(_), Exact(_)) => raise Syntax("INVALID_DATE", day_start)
+    (Masked, Exact(_)) => raise Syntax("INVALID_DATE", day_start)
     (Exact(m), Exact(d)) => {
       let limit = match year {
         Exact(y) => month_days(y, m)
@@ -214,6 +223,9 @@ fn Parser::parse_date(self : Parser) -> EdtfDate raise EdtfError {
   let mut day : DaySpec = Unspecified
   let mut day_qualifier = Qualifier::none()
   if self.peek() == 45 {
+    if year is Masked(_, _) {
+      raise Syntax("INVALID_DATE", self.pos)
+    }
     let (m, mq) = self.parse_month()
     month = m
     month_qualifier = mq
@@ -259,24 +271,132 @@ fn Parser::parse_interval_end(self : Parser) -> Endpoint raise EdtfError {
 }
 
 ///|
+fn Parser::expect_time_separator(
+  self : Parser,
+  expected : Int,
+  code : String,
+) -> Unit raise EdtfError {
+  if self.peek() != expected {
+    raise Syntax(code, self.pos)
+  }
+  self.pos += 1
+}
+
+///|
+fn Parser::parse_datetime(
+  self : Parser,
+  date : EdtfDate,
+) -> EdtfDateTime raise EdtfError {
+  let start = self.pos
+  match (date.year, date.month, date.day) {
+    (Exact(_), Exact(_), Exact(_)) => ()
+    _ => raise Syntax("DATETIME_NEEDS_EXACT_DATE", start)
+  }
+  if date.year_qualifier.uncertain ||
+    date.year_qualifier.approximate ||
+    date.month_qualifier.uncertain ||
+    date.month_qualifier.approximate ||
+    date.day_qualifier.uncertain ||
+    date.day_qualifier.approximate {
+    raise Syntax("DATETIME_QUALIFIED", start)
+  }
+  self.pos += 1 // T
+  let hour_start = self.pos
+  let hour = parse_int_digits(self.read_two_digits("EXPECTED_HOUR"))
+  if hour > 23 {
+    raise Syntax("INVALID_HOUR", hour_start)
+  }
+  self.expect_time_separator(58, "EXPECTED_TIME_SEPARATOR")
+  let minute_start = self.pos
+  let minute = parse_int_digits(self.read_two_digits("EXPECTED_MINUTE"))
+  if minute > 59 {
+    raise Syntax("INVALID_MINUTE", minute_start)
+  }
+  self.expect_time_separator(58, "EXPECTED_TIME_SEPARATOR")
+  let second_start = self.pos
+  let second = parse_int_digits(self.read_two_digits("EXPECTED_SECOND"))
+  if second > 59 {
+    raise Syntax("INVALID_SECOND", second_start)
+  }
+  let zone = match self.peek() {
+    90 => {
+      self.pos += 1
+      Utc
+    }
+    43 | 45 => {
+      let sign = if self.peek() == 45 { -1 } else { 1 }
+      self.pos += 1
+      let shift_start = self.pos
+      let hours = parse_int_digits(self.read_two_digits("EXPECTED_OFFSET_HOUR"))
+      let mut minutes = 0
+      let mut has_minutes = false
+      if self.peek() == 58 {
+        self.pos += 1
+        minutes = parse_int_digits(
+          self.read_two_digits("EXPECTED_OFFSET_MINUTE"),
+        )
+        has_minutes = true
+      }
+      if hours > 14 || minutes > 59 || (hours == 14 && minutes != 0) {
+        raise Syntax("INVALID_OFFSET", shift_start)
+      }
+      Offset(sign, hours, minutes, has_minutes)
+    }
+    _ => Local
+  }
+  { date, hour, minute, second, zone, }
+}
+
+///|
+fn validate_set_range(
+  start : EdtfDate,
+  end : EdtfDate,
+  offset : Int,
+) -> Unit raise EdtfError {
+  if is_qualified(start) || is_qualified(end) {
+    raise Syntax("INVALID_SET_RANGE", offset)
+  }
+  match (start.year, end.year) {
+    (Exact(_), Exact(_)) => ()
+    _ => raise Syntax("INVALID_SET_RANGE", offset)
+  }
+  match (start.month, end.month) {
+    (Unspecified, Unspecified) | (Exact(_), Exact(_)) => ()
+    _ => raise Syntax("INVALID_SET_RANGE", offset)
+  }
+  match (start.day, end.day) {
+    (Unspecified, Unspecified) | (Exact(_), Exact(_)) => ()
+    _ => raise Syntax("INVALID_SET_RANGE", offset)
+  }
+  if calendar_compare(date_edge(start, false), date_edge(end, true)) > 0 {
+    raise Syntax("INVALID_SET_RANGE", offset)
+  }
+}
+
+///|
 fn Parser::parse_set(self : Parser) -> EdtfValue raise EdtfError {
   let start = self.pos
+  let all_members = self.peek() == 123
+  let closing = if all_members { 125 } else { 93 }
   self.pos += 1
-  if self.peek() == 93 {
+  if self.peek() == closing {
     raise Syntax("INVALID_SET", start)
   }
   let items : Array[EdtfValue] = []
   while true {
-    if self.peek() == 91 {
+    if self.peek() == 91 || self.peek() == 123 {
       raise Syntax("INVALID_SET", self.pos)
     }
     if self.peek() == -1 {
       raise Syntax("INVALID_SET", self.pos)
     }
+    let range_start = self.pos
     let first = self.parse_date()
     let item = if self.peek() == 46 && self.peek_at(self.pos + 1) == 46 {
       self.pos += 2
-      Range(first, self.parse_date())
+      let end = self.parse_date()
+      validate_set_range(first, end, range_start)
+      Range(first, end)
     } else {
       Date(first)
     }
@@ -284,15 +404,17 @@ fn Parser::parse_set(self : Parser) -> EdtfValue raise EdtfError {
     match self.peek() {
       44 => {
         self.pos += 1
-        if self.peek() == 93 {
+        if self.peek() == closing {
           raise Syntax("INVALID_SET", self.pos)
         }
       }
-      93 => {
-        self.pos += 1
-        return Set(items)
+      _ => {
+        if self.peek() == closing {
+          self.pos += 1
+          return if all_members { AllSet(items) } else { Set(items) }
+        }
+        raise Syntax("INVALID_SET", self.pos)
       }
-      _ => raise Syntax("INVALID_SET", self.pos)
     }
   }
   raise Syntax("INVALID_SET", start)
@@ -300,10 +422,16 @@ fn Parser::parse_set(self : Parser) -> EdtfValue raise EdtfError {
 
 ///|
 fn Parser::parse_value(self : Parser) -> EdtfValue raise EdtfError {
-  if self.peek() == 91 {
+  if self.peek() == 91 || self.peek() == 123 {
     return self.parse_set()
   }
   let first = if self.peek() == 47 { Unknown } else { self.parse_endpoint() }
+  if self.peek() == 84 {
+    return match first {
+      Known(date) => DateTime(self.parse_datetime(date))
+      _ => raise Syntax("DATETIME_NEEDS_EXACT_DATE", self.pos)
+    }
+  }
   if self.peek() == 47 {
     self.pos += 1
     let second = self.parse_interval_end()

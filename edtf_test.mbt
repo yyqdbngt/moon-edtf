@@ -90,6 +90,36 @@ test "choice sets and range shorthand are supported" {
 }
 
 ///|
+test "unspecified month and day forms retain precision" {
+  for s in ["2004-XX", "1985-04-XX", "1985-XX-XX"] {
+    assert_eq(normalized(s), s)
+    assert_eq(parse(normalized(s)), parse(s))
+  }
+  for s in ["2004-X", "2004-XXX", "2004-0X", "1985-XX-12", "19XX-02"] {
+    assert_true(is_invalid(s))
+  }
+}
+
+///|
+test "all-member braces differ from one-of brackets" {
+  let one = parse("[1667,1668,1670..1672]")
+  let all = parse("{1667,1668,1670..1672}")
+  assert_true(one != all)
+  assert_eq(all.to_string(), "{1667,1668,1670..1672}")
+  assert_eq(parse(all.to_string()), all)
+  match all {
+    AllSet([Date(_), Date(_), Range(_, _)]) => ()
+    _ => fail("curly braces must keep inclusive-set semantics")
+  }
+  for s in ["{}", "{1667,}", "{1667,[1668]}", "{1667,1668]", "[1667,1668}"] {
+    assert_true(is_invalid(s))
+  }
+  for s in ["[1672..1667]", "[1984-06..1985]", "{1984?..1985}"] {
+    assert_true(is_invalid(s))
+  }
+}
+
+///|
 test "batch diagnostics distinguish valid and invalid rows" {
   let rows = diagnose_batch(["1984?", "1984-13", "19XX"])
   assert_eq(rows.length(), 3)
