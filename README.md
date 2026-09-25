@@ -2,14 +2,17 @@
 
 [![CI](https://github.com/yyqdbngt/moon-edtf/actions/workflows/ci.yml/badge.svg)](https://github.com/yyqdbngt/moon-edtf/actions/workflows/ci.yml)
 
-纯 MoonBit 实现的 EDTF（Extended Date/Time Format）**明确子集**解析库。核心目标是保留日期的不确定/近似/掩码语义，而不是把“约 1984 年”擅自变成某个精确时间戳。
+纯 MoonBit 的通用时间数据质量与查询工具。它解析 EDTF（Extended Date/Time Format）
+的**明确子集**，保留不确定/近似/掩码语义，并为科研数据、事件索引、有效期、项目阶段、
+知识图谱和元数据提供批量校验、保守检索与时间关系分析。
 
 ## 目标
 
 - 解析并校验一组严格限定的 EDTF 日期、日期时间、区间和集合/选择。
 - 内部表示区分精确值、uncertain、approximate、both、masked/unspecified、open/unknown 端点。
 - 对批量输入给出 valid/invalid、稳定错误码、原始 UTF-16 偏移和规范化输出。
-- 为馆藏元数据导入提供保守日期包络与批量时间窗审计，无法安全判断的记录交人工复核。
+- 为任意业务记录提供保守日期包络、严格/召回优先时间窗审计和跨记录关系判断。
+- 每条输入保留结果，无法安全判断的记录进入人工复核，不静默丢行或伪造时间戳。
 - 零第三方依赖，仅使用 `moonbitlang/core` 基础包。
 
 ## 安装与使用
@@ -22,7 +25,7 @@ cd moon-edtf
 moon run examples/basic --target js
 ```
 
-MoonCakes [`yyqdbngt/moon_edtf@0.2.0`](https://mooncakes.io/api/v0/modules/yyqdbngt/moon_edtf)
+MoonCakes 当前稳定版 [`yyqdbngt/moon_edtf@0.2.0`](https://mooncakes.io/api/v0/modules/yyqdbngt/moon_edtf)
 已发布并独立下载安装验证；命令、消费程序输出和 SHA-256 见
 [发布验证记录](docs/release-verification.md)。消费项目可运行
 `moon add yyqdbngt/moon_edtf@0.2.0`。
@@ -50,6 +53,7 @@ moon run examples/basic --target wasm-gc
 moon run examples/basic --target js
 moon run examples/basic --target native
 moon run examples/catalog-audit --target js
+moon run examples/temporal-query --target js
 ```
 
 ## 验证
@@ -69,6 +73,7 @@ moon run examples/basic --target wasm
 moon run examples/basic --target wasm-gc
 moon run examples/basic --target js
 moon run examples/catalog-audit --target js
+moon run examples/temporal-query --target js
 ```
 
 `native` 由 CI 覆盖；如果本地旧 C 编译器不可用，可跳过本地 native 验证。
@@ -95,13 +100,23 @@ moon run examples/catalog-audit --target js
 | 批量诊断 | `diagnose_batch([...])` | 不抛异常，返回逐条结果 |
 | 保守包络 | `date_envelope` / `window_relation` | 只表示可能覆盖的外边界；可能重叠不等于实际命中 |
 | 馆藏批量审计 | `audit_catalog` | 有效、格式错误、人工复核、窗口外/内/可能相交分类 |
+| 通用数据集查询 | `query_temporal_records` | 任意业务记录、严格/召回优先策略、逐条结果和安全覆盖范围 |
+| 时间关系分析 | `temporal_relation` | 确定先后、相同覆盖、包含、被包含或可能相交 |
 | 有限比较 | 两个完整、无修饰、精确日期 | 其他情况显式拒绝 |
 
 精确年份按格里高利规则校验月/日。掩码年份限四位、末尾一或两位 X；
 掩码年份只支持单独的年份表达式；`19XX-02-29` 不在支持子集内。月/日 `XX` 只在上表
 列出的右侧未指定形式出现。
 
-## 实际工作流：馆藏日期字段筛查
+## 主要工作流：通用时间数据查询
+
+`examples/temporal-query` 使用同一 API 处理科研观测、产品年份、项目区间、事件索引和
+API 脏数据。查询 2024 年 5 月时，五条记录分别得到窗内、可能相交、窗外、人工复核、
+非法各一条；召回优先策略只选中前两条。`temporal_test.mbt` 另以 10,000 条记录验证
+不丢行、分类计数和选择策略。复现与验收边界见
+[通用时间查询场景](docs/temporal-query-scenario.md)。
+
+## 兼容工作流：馆藏日期字段筛查
 
 `examples/catalog-audit` 用 Library of Congress EDTF / RDA 公开示例的写法组成 6 条
 **示范记录**（记录 ID 与批次是示范数据，不冒称真实馆藏记录），查询 1985 年 4 月。
@@ -129,6 +144,7 @@ moon run examples/catalog-audit --target js
 
 - [技术设计与支持矩阵](docs/design.md)
 - [馆藏批量筛查场景测试](docs/catalog-scenario.md)
+- [通用时间查询场景测试](docs/temporal-query-scenario.md)
 - [MoonCakes 0.2.0 独立安装验证](docs/release-verification.md)
 - [规范来源与查重说明](docs/provenance.md)
 - [申报前技术事实清单](docs/applicant-notes.md)

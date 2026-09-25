@@ -1,8 +1,8 @@
 # Moon EDTF
 
-Pure-MoonBit parser for a conservative EDTF subset. It preserves uncertainty,
-approximation, masked low-order digits, and open/unknown interval endpoints.
-Zero third-party package dependencies.
+Pure-MoonBit temporal data validation and query toolkit built on a conservative
+EDTF subset. It preserves uncertainty, approximation, masked low-order digits,
+and open/unknown interval endpoints. Zero third-party package dependencies.
 
 ## Consumer example
 
@@ -38,6 +38,8 @@ The source repository contains a runnable version in `examples/basic`.
 - `date_envelope(value : EdtfValue) -> DateEnvelope raise EdtfError`
 - `window_relation(value, query_start, query_end) -> WindowRelation raise EdtfError`
 - `audit_catalog(entries, query_start, query_end) -> CatalogReport raise EdtfError`
+- `query_temporal_records(records, query_start, query_end, policy) -> TemporalReport raise EdtfError`
+- `temporal_relation(left, right) -> TemporalRelation raise EdtfError`
 
 `EdtfError` is a stable error type with variants `Syntax(code, offset)` and
 `Unsupported(code, offset)`. `offset` is a half-open UTF-16 offset into the
@@ -73,6 +75,11 @@ Invalid rows keep `normalized` as `""`.
   `PossibleOverlap` can be a false positive where an envelope has gaps.
 - Structured catalog batch audit with invalid/review/outside/within/possible
   findings and counts. See `examples/catalog-audit` in the repository.
+- Domain-neutral temporal record queries with strict or recall-first selection,
+  selected IDs, per-row findings and safe aggregate coverage. See
+  `examples/temporal-query`.
+- Conservative relation checks for definite order, containment, equal coverage
+  and possible overlap between two values.
 
 Month and day boundaries are validated. Exact years use the proleptic Gregorian
 leap-year rule. Masked years are year-only; `19XX-02-29` is rejected in this subset.

@@ -56,6 +56,13 @@ unbounded endpoints and date-times are refused, never silently coerced.
 `audit_catalog` applies the same logic to structured fields and separates
 syntax errors from cases requiring human review.
 
+`query_temporal_records` is the domain-neutral integration layer. It retains
+the caller's record ID and category, guarantees one finding per input, supports
+strict or recall-first selection, and reports safe aggregate coverage.
+`temporal_relation` compares two conservative envelopes for order and
+containment. These APIs do not know about CSV, JSON, databases, or any business
+domain, so adapters can remain in the consuming application.
+
 diagnose catches typed errors; batch mode reports every row. Error offsets are
 zero-based UTF-16 positions in the original input. Error values do not echo
 input text; diagnostic records intentionally retain their input field.
@@ -69,10 +76,10 @@ enumeration. Intervals are parsed, not expanded. There is no streaming or IO lay
 
 ## Verification
 
-`edtf_test.mbt`, `regression_test.mbt`, `datetime_test.mbt`, `envelope_test.mbt`
-and `catalog_test.mbt` cover calendar checks, qualification scope, date-time
+`edtf_test.mbt`, `regression_test.mbt`, `datetime_test.mbt`, `envelope_test.mbt`,
+`catalog_test.mbt` and `temporal_test.mbt` cover calendar checks, qualification scope, date-time
 boundaries, distinct endpoint states, set ranges, round trips, conservative
-window relations and batch counts. CI checks/builds/tests/runs both examples
+window relations, policy selection and 10,000-row batch counts. CI checks/builds/tests/runs all examples
 on four MoonBit targets.
 
 Specification: [Library of Congress EDTF](https://www.loc.gov/standards/datetime/).
