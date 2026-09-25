@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.0 — domain-neutral temporal data query (2026-09-25)
+
+- Add `TemporalRecord` and `query_temporal_records` for scientific data,
+  event indexes, availability windows, project milestones and metadata.
+- Add strict and recall-first match policies, selected IDs, complete per-row
+  findings, safe aggregate coverage, and five stable decision categories.
+- Add `temporal_relation` for provable order, containment, equal coverage and
+  conservative overlap checks without inventing timestamps.
+- Add a cross-domain runnable example and a 10,000-record integrity test.
+- Keep the catalog API backward compatible; broaden the project through actual
+  reusable code rather than relabelling the existing scenario.
+- 44 test blocks cover the parser, date-time model, envelopes, catalog flow and
+  domain-neutral temporal query.
+
 ## 0.2.0 — catalog screening and expanded EDTF subset (2026-09-21)
 
 - Add explicit `XX` month/day forms and distinguish all-member `{...}` sets from

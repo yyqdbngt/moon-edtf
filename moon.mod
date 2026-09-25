@@ -1,6 +1,6 @@
 name = "yyqdbngt/moon_edtf"
 
-version = "0.2.0"
+version = "0.3.0"
 
 readme = "README.mbt.md"
 
@@ -8,6 +8,6 @@ repository = "https://github.com/yyqdbngt/moon-edtf"
 
 license = "Apache-2.0"
 
-keywords = [ "edtf", "datetime", "dates", "uncertainty", "diagnostics" ]
+keywords = [ "edtf", "datetime", "temporal-data", "data-quality", "search" ]
 
-description = "Conservative pure-MoonBit EDTF subset parser that preserves uncertainty and rejects guesswork."
+description = "Pure-MoonBit temporal data validation and query toolkit that preserves EDTF uncertainty."

@@ -27,3 +27,4 @@ jobs:
       - run: moon test --target ${{ matrix.target }} --deny-warn
       - run: moon run examples/basic --target ${{ matrix.target }}
       - run: moon run examples/catalog-audit --target ${{ matrix.target }}
+      - run: moon run examples/temporal-query --target ${{ matrix.target }}

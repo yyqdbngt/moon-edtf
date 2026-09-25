@@ -1,0 +1,5 @@
+import {
+  "yyqdbngt/moon_edtf" @edtf,
+}
+
+pkgtype(kind: "executable")
